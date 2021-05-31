@@ -11,8 +11,6 @@ import java.io.*;
 import java.sql.*;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Properties;
 
 public class AlertRabbit {
@@ -38,11 +36,10 @@ public class AlertRabbit {
     public static void main(String[] args) throws Exception {
         Properties interval = getProperties();
         try (Connection connection = initConnection()) {
-            List<Long> store = new ArrayList<>();
             Scheduler scheduler = StdSchedulerFactory.getDefaultScheduler();
             scheduler.start();
             JobDataMap data = new JobDataMap();
-            data.put("store", store);
+            data.put("cn", connection);
             JobDetail job = newJob(Rabbit.class)
                     .usingJobData(data)
                     .build();
@@ -56,7 +53,6 @@ public class AlertRabbit {
             scheduler.scheduleJob(job, trigger);
             Thread.sleep(10000);
             scheduler.shutdown();
-            System.out.println(store);
         } catch (Exception se) {
             se.printStackTrace();
         }
@@ -66,9 +62,8 @@ public class AlertRabbit {
         @Override
         public void execute(JobExecutionContext context) throws JobExecutionException {
             System.out.println("Rabbit runs here ...");
-            List<Long> store = (List<Long>) context.getJobDetail().getJobDataMap().get("store");
-            store.add(System.currentTimeMillis());
-            try (PreparedStatement statement = initConnection()
+            Connection connection = (Connection) context.getJobDetail().getJobDataMap().get("cn");
+            try (PreparedStatement statement = connection
                     .prepareStatement(
                             "insert into rabbit (time_connect, date_connect) values( ?, ?) ")) {
                 statement.setTime(1, Time.valueOf(LocalTime.now()));
