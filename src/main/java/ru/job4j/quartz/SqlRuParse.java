@@ -14,7 +14,7 @@ public class SqlRuParse {
             System.out.println(href.attr("href"));
             System.out.println(href.text());
             Elements date = td.nextElementSiblings();
-            System.out.println(date.get(3).text());
+            System.out.println(date.get(4).text());
         }
     }
 }
