@@ -14,12 +14,12 @@ import java.time.LocalTime;
 import java.util.Properties;
 
 public class AlertRabbit {
-    public static Connection initConnection() throws Exception {
-        Properties properties = getProperties();
-        Class.forName(properties.getProperty("driver"));
-        String url = properties.getProperty("url");
-        String login = properties.getProperty("username");
-        String password = properties.getProperty("password");
+
+    public static Connection initConnection(Properties settings) throws Exception {
+        Class.forName(settings.getProperty("driver"));
+        String url = settings.getProperty("url");
+        String login = settings.getProperty("username");
+        String password = settings.getProperty("password");
         return DriverManager.getConnection(url, login, password);
     }
 
@@ -34,8 +34,8 @@ public class AlertRabbit {
 
 
     public static void main(String[] args) throws Exception {
-        Properties interval = getProperties();
-        try (Connection connection = initConnection()) {
+        Properties properties = getProperties();
+        try (Connection connection = initConnection(properties)) {
             Scheduler scheduler = StdSchedulerFactory.getDefaultScheduler();
             scheduler.start();
             JobDataMap data = new JobDataMap();
@@ -44,7 +44,7 @@ public class AlertRabbit {
                     .usingJobData(data)
                     .build();
             SimpleScheduleBuilder times = simpleSchedule()
-                    .withIntervalInSeconds(Integer.parseInt(interval.getProperty("rabbit.interval")))
+                    .withIntervalInSeconds(Integer.parseInt(properties.getProperty("rabbit.interval")))
                     .repeatForever();
             Trigger trigger = newTrigger()
                     .startNow()
@@ -76,4 +76,3 @@ public class AlertRabbit {
         }
     }
 }
-
