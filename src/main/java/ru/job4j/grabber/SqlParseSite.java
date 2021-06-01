@@ -1,4 +1,4 @@
-package ru.job4j.quartz;
+package ru.job4j.grabber;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -11,9 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-public class SqlParseSite {
-
-
+public class SqlParseSite implements Parse {
     private List<Post> posts = new ArrayList<>();
 
     public List<Post> getPosts() {
@@ -50,7 +48,24 @@ public class SqlParseSite {
         }
     }
 
-    public void detail(String link) {
+    @Override
+    public List<Post> list(String link) {
+        Document doc = null;
+        try {
+            doc = Jsoup.connect(link).get();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        Elements row = doc.select(".postslisttopic");
+        for (Element td : row) {
+            Element href = td.child(0);
+            String ref = href.attr("href");
+            posts.add(new Post(ref));
+        }
+        return posts;
+    }
+
+    public Post detail(String link) throws ParseException {
         SqlRuDateTimeParser date = new SqlRuDateTimeParser();
         Document doc = null;
         try {
@@ -62,18 +77,17 @@ public class SqlParseSite {
         String name = doc.select(".messageHeader").get(0).text();
         String created = doc.select(".msgFooter").get(0).text();
         created = new StringBuilder(created).substring(0, created.indexOf("["));
-        try {
-            posts.add(new Post(name, text, link, date.parse(created)));
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
+        return new Post(name, text, link, date.parse(created));
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws ParseException {
         SqlParseSite sql = new SqlParseSite();
         //sql.pages("https://www.sql.ru/forum/job-offers/", 5);
-        sql.detail("https://www.sql.ru/forum/1325330/lidy-be-fe-senior-cistemnye-analitiki-qa-i-devops-moskva-do-200t");
-        System.out.println(sql.getPosts());
-
+        //sql.detail("https://www.sql.ru/forum/1325330/lidy-be-fe-senior-cistemnye-analitiki-qa-i-devops-moskva-do-200t");
+       sql.list("https://www.sql.ru/forum/job-offers/5");
+        for (Post post : sql.getPosts()) {
+            post = sql.detail(post.getLink());
+            System.out.println(post);
+        }
     }
 }
