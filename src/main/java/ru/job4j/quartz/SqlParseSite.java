@@ -7,17 +7,27 @@ import org.jsoup.select.Elements;
 
 import java.io.IOException;
 import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.List;
 
 
 public class SqlParseSite {
-    public void pages(String link, int pages)  {
+
+
+    private List<Post> posts = new ArrayList<>();
+
+    public List<Post> getPosts() {
+        return posts;
+    }
+
+    public void pages(String link, int pages) {
         for (int i = 1; i <= pages; i++) {
-            String newStr = String.format(link + "/" + "%s", i);
+            String newStr = String.format(link + "%s", i);
             parse(newStr);
         }
     }
 
-    public void parse(String link)  {
+    public void parse(String link) {
         SqlRuDateTimeParser date = new SqlRuDateTimeParser();
         Document doc = null;
         try {
@@ -40,8 +50,30 @@ public class SqlParseSite {
         }
     }
 
+    public void detail(String link) {
+        SqlRuDateTimeParser date = new SqlRuDateTimeParser();
+        Document doc = null;
+        try {
+            doc = Jsoup.connect(link).get();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        String text = doc.select(".msgBody").get(1).text();
+        String name = doc.select(".messageHeader").get(0).text();
+        String created = doc.select(".msgFooter").get(0).text();
+        created = new StringBuilder(created).substring(0, created.indexOf("["));
+        try {
+            posts.add(new Post(name, text, link, date.parse(created)));
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+    }
+
     public static void main(String[] args) {
         SqlParseSite sql = new SqlParseSite();
-        sql.pages("https://www.sql.ru/forum/job-offers", 5);
+        //sql.pages("https://www.sql.ru/forum/job-offers/", 5);
+        sql.detail("https://www.sql.ru/forum/1325330/lidy-be-fe-senior-cistemnye-analitiki-qa-i-devops-moskva-do-200t");
+        System.out.println(sql.getPosts());
+
     }
 }
