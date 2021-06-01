@@ -1,4 +1,4 @@
-package ru.job4j.quartz;
+package ru.job4j.grabber;
 
 import java.text.DateFormatSymbols;
 import java.text.ParseException;
