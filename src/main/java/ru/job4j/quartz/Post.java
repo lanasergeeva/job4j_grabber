@@ -1,12 +1,14 @@
 package ru.job4j.quartz;
 
 
+import java.time.LocalDateTime;
+
 public class Post {
     private int id;
     private String name;
     private String text;
     private String link;
-    private String created;
+    private LocalDateTime created;
 
     public int getId() {
         return id;
@@ -40,11 +42,11 @@ public class Post {
         this.link = link;
     }
 
-    public String getCreated() {
+    public LocalDateTime getCreated() {
         return created;
     }
 
-    public void setCreated(String created) {
+    public void setCreated(LocalDateTime created) {
         this.created = created;
     }
 }
