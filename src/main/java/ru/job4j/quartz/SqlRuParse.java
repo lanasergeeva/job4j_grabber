@@ -13,8 +13,8 @@ public class SqlRuParse {
             Element href = td.child(0);
             System.out.println(href.attr("href"));
             System.out.println(href.text());
-            Elements date = td.nextElementSiblings();
-            System.out.println(date.get(4).text());
+           /* Elements date = td.nextElementSiblings();
+            System.out.println(date.get(3).text());*/
         }
     }
 }

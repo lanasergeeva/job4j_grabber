@@ -1,4 +1,4 @@
-package ru.job4j.quartz;
+package ru.job4j.grabber;
 
 
 import java.time.LocalDateTime;
@@ -9,6 +9,13 @@ public class Post {
     private String text;
     private String link;
     private LocalDateTime created;
+
+    public Post() {
+    }
+
+    public Post(String link) {
+        this.link = link;
+    }
 
     public Post(String name, String text, String link, LocalDateTime created) {
         this.name = name;
@@ -60,8 +67,8 @@ public class Post {
     @Override
     public String toString() {
         return "Post{"
-                + "name='" + name + '\''
-                + ", text='" + text + '\''
+                + "name='" + name + System.lineSeparator() + '\''
+                + ", text='" + text + System.lineSeparator() +  '\''
                 + ", link='" + link + '\''
                 + ", created=" + created
                 + '}';
