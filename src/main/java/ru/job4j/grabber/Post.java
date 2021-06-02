@@ -2,6 +2,7 @@ package ru.job4j.grabber;
 
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 public class Post {
     private int id;
@@ -18,6 +19,14 @@ public class Post {
     }
 
     public Post(String name, String text, String link, LocalDateTime created) {
+        this.name = name;
+        this.text = text;
+        this.link = link;
+        this.created = created;
+    }
+
+    public Post(int id, String name, String text, String link, LocalDateTime created) {
+        this.id = id;
         this.name = name;
         this.text = text;
         this.link = link;
@@ -68,9 +77,26 @@ public class Post {
     public String toString() {
         return "Post{"
                 + "name='" + name + System.lineSeparator() + '\''
-                + ", text='" + text + System.lineSeparator() +  '\''
+                + ", text='" + text + System.lineSeparator() + '\''
                 + ", link='" + link + '\''
                 + ", created=" + created
                 + '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        Post post = (Post) o;
+        return id == post.id && Objects.equals(name, post.name) && Objects.equals(text, post.text) && Objects.equals(link, post.link) && Objects.equals(created, post.created);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, name, text, link, created);
     }
 }
