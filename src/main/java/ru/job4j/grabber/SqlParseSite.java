@@ -65,7 +65,8 @@ public class SqlParseSite implements Parse {
         return posts;
     }
 
-    public Post detail(String link) throws ParseException {
+    public Post detail(String link) {
+        Post post = new Post();
         SqlRuDateTimeParser date = new SqlRuDateTimeParser();
         Document doc = null;
         try {
@@ -77,14 +78,19 @@ public class SqlParseSite implements Parse {
         String name = doc.select(".messageHeader").get(0).text();
         String created = doc.select(".msgFooter").get(0).text();
         created = new StringBuilder(created).substring(0, created.indexOf("["));
-        return new Post(name, text, link, date.parse(created));
+        try {
+            post = new Post(name, text, link, date.parse(created));
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return post;
     }
 
-    public static void main(String[] args) throws ParseException {
+    public static void main(String[] args) {
         SqlParseSite sql = new SqlParseSite();
         //sql.pages("https://www.sql.ru/forum/job-offers/", 5);
         //sql.detail("https://www.sql.ru/forum/1325330/lidy-be-fe-senior-cistemnye-analitiki-qa-i-devops-moskva-do-200t");
-       sql.list("https://www.sql.ru/forum/job-offers/5");
+        sql.list("https://www.sql.ru/forum/job-offers/5");
         for (Post post : sql.getPosts()) {
             post = sql.detail(post.getLink());
             System.out.println(post);
