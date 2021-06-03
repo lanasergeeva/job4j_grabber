@@ -28,7 +28,8 @@ public class Grabber implements Grab {
     }
 
     public void cfg() throws IOException {
-        try (InputStream in = new FileInputStream(new File("./src/main/resources/app.properties"))) {
+        try (InputStream in =
+                     new FileInputStream(new File("C:\\projects\\job4j_grabber\\src\\main\\resources\\app.properties"))) {
             cfg.load(in);
         }
     }
@@ -45,8 +46,7 @@ public class Grabber implements Grab {
                 .withIntervalInSeconds(Integer.parseInt(cfg.getProperty("time")))
                 .repeatForever();
         Trigger trigger = newTrigger()
-                /*.withIdentity("triger1", "group10")
-                .withSchedule(CronScheduleBuilder.cronSchedule(cfg.getProperty("interval")))*/
+                .startNow()
                 .withSchedule(times)
                 .build();
         try {
@@ -68,13 +68,13 @@ public class Grabber implements Grab {
                 try {
                     post = parse.detail(post.getLink());
                     if (post.getName().toLowerCase().contains("java")
-                            || post.getText().toLowerCase().contains("java")) {
+                            && !post.getName().toLowerCase().contains("javascript")) {
                         store.save(post);
+                        System.out.println(post);
                     }
                 } catch (ParseException e) {
                     e.printStackTrace();
                 }
-                System.out.println(post);
             }
         }
     }
