@@ -13,21 +13,7 @@ public class SqlRuParse {
             Element href = td.child(0);
             System.out.println(href.attr("href"));
             System.out.println(href.text());
-           /* Elements date = td.nextElementSiblings();
-            System.out.println(date.get(3).text());*/
+            Elements date = td.nextElementSiblings();
         }
     }
 }
-    /*Второй вариант*/
-    /*public static void main(String[] args) throws Exception {
-        Document doc = Jsoup.connect("https://www.sql.ru/forum/job-offers").get();
-        Elements row = doc.select(".postslisttopic");
-        for (Element td : row) {
-            Element href = td.child(0);
-            System.out.println(href.attr("href"));
-            System.out.println(href.text());
-            Elements date = td.siblingElements();
-            System.out.println(date.get(4).text());
-        }
-    }
-*/

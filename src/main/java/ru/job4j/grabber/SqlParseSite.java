@@ -88,8 +88,6 @@ public class SqlParseSite implements Parse {
 
     public static void main(String[] args) {
         SqlParseSite sql = new SqlParseSite();
-        //sql.pages("https://www.sql.ru/forum/job-offers/", 5);
-        //sql.detail("https://www.sql.ru/forum/1325330/lidy-be-fe-senior-cistemnye-analitiki-qa-i-devops-moskva-do-200t");
         sql.list("https://www.sql.ru/forum/job-offers/5");
         for (Post post : sql.getPosts()) {
             post = sql.detail(post.getLink());

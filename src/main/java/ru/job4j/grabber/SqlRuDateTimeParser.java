@@ -42,7 +42,7 @@ public class SqlRuDateTimeParser implements DateTimeParser {
 
 
     public static void main(String[] args) throws ParseException {
-        String par = "15 июн 20, 19:23";
+        String par = "сегодня, 19:23";
         SqlRuDateTimeParser sq = new SqlRuDateTimeParser();
         System.out.println(sq.parse(par));
     }
