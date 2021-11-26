@@ -1,12 +1,16 @@
 package ru.job4j.grabber;
 
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 import org.quartz.*;
 import org.quartz.impl.StdSchedulerFactory;
 
-import java.io.*;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.text.ParseException;
 import java.util.List;
 import java.util.Properties;
 
@@ -15,6 +19,9 @@ import static org.quartz.SimpleScheduleBuilder.simpleSchedule;
 import static org.quartz.TriggerBuilder.newTrigger;
 
 public class Grabber implements Grab {
+
+    private static final Logger LOG = LogManager.getLogger(Grabber.class.getName());
+
     private final Properties cfg = new Properties();
 
     public Store store() {
@@ -29,7 +36,7 @@ public class Grabber implements Grab {
 
     public void cfg() throws IOException {
         try (InputStream in =
-                     new FileInputStream(new File("C:\\projects\\job4j_grabber\\src\\main\\resources\\app.properties"))) {
+                     new FileInputStream("C:\\projects\\job4j_grabber\\src\\main\\resources\\app.properties")) {
             cfg.load(in);
         }
     }
@@ -52,29 +59,21 @@ public class Grabber implements Grab {
         try {
             scheduler.scheduleJob(job, trigger);
         } catch (SchedulerException e) {
-            e.printStackTrace();
+            LOG.error(" SchedulerException исключение в init", e);
         }
     }
 
     public static class GrabJob implements Job {
 
         @Override
-        public void execute(JobExecutionContext context) throws JobExecutionException {
+        public void execute(JobExecutionContext context) {
             JobDataMap map = context.getJobDetail().getJobDataMap();
             Store store = (Store) map.get("store");
             Parse parse = (Parse) map.get("parse");
             List<Post> posts = parse.list("https://www.sql.ru/forum/job-offers/");
             for (Post post : posts) {
-                try {
-                    post = parse.detail(post.getLink());
-                    if (post.getName().toLowerCase().contains("java")
-                            && !post.getName().toLowerCase().contains("javascript")) {
-                        store.save(post);
-                        System.out.println(post);
-                    }
-                } catch (ParseException e) {
-                    e.printStackTrace();
-                }
+                store.save(post);
+                System.out.println(post);
             }
         }
     }
@@ -91,21 +90,22 @@ public class Grabber implements Grab {
                             out.write(System.lineSeparator().getBytes());
                         }
                     } catch (IOException io) {
-                        io.printStackTrace();
+                        LOG.error(" IO исключение в web", io);
                     }
                 }
             } catch (Exception e) {
-                e.printStackTrace();
+                LOG.error(" Ошибка в web", e);
             }
         }).start();
     }
 
     public static void main(String[] args) throws Exception {
         Grabber grab = new Grabber();
+        DateTimeParser dt = new SqlRuDateTimeParser();
         grab.cfg();
         Scheduler scheduler = grab.scheduler();
         Store store = grab.store();
-        grab.init(new SqlParseSite(), store, scheduler);
+        grab.init(new SqlParseSite(dt), store, scheduler);
         grab.web(store);
     }
 }

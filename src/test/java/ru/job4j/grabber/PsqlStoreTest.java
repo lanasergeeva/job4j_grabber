@@ -29,7 +29,7 @@ public class PsqlStoreTest {
             e.printStackTrace();
         }
         try {
-            Class.forName(config.getProperty("driver_class"));
+            Class.forName(config.getProperty("driver"));
         } catch (ClassNotFoundException classNotFoundException) {
             classNotFoundException.printStackTrace();
         }

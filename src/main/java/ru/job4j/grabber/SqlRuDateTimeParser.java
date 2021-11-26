@@ -14,7 +14,7 @@ public class SqlRuDateTimeParser implements DateTimeParser {
             new SimpleDateFormat("dd MMM yy HH:mm", getDfs());
     private final DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd MMMM yy");
 
-    public static final String[] getMonths() {
+    public static String[] getMonths() {
         return new String[]{"янв", "фев", "мар", "апр", "май", "июн",
                 "июл", "авг", "сен", "окт", "ноя", "дек"};
     }
@@ -25,24 +25,26 @@ public class SqlRuDateTimeParser implements DateTimeParser {
     }
 
     @Override
-    public LocalDateTime parse(String parse) throws ParseException {
-        LocalDateTime rsl;
+    public LocalDateTime parse(String parse)  {
+        LocalDateTime rsl = null;
         parse = new StringBuilder(parse).deleteCharAt(parse.indexOf(",")).toString();
         String[] array = parse.split(" ");
         if (parse.contains("вчера") || parse.contains("сегодня")) {
             array[0] = parse.contains("вчера") ? LocalDate.now().minusDays(1).format(dtf)
                     : LocalDate.now().format(dtf);
             parse = array[0] + " " + array[1];
+        }
+        try {
             rsl = LocalDateTime.ofInstant(sdf.parse(parse).toInstant(), ZoneId.systemDefault());
-        } else {
-            rsl = LocalDateTime.ofInstant(sdf.parse(parse).toInstant(), ZoneId.systemDefault());
+        } catch (ParseException e) {
+            e.printStackTrace();
         }
         return rsl;
     }
 
 
     public static void main(String[] args) throws ParseException {
-        String par = "сегодня, 19:23";
+        String par = "26 окт 21, 19:23";
         SqlRuDateTimeParser sq = new SqlRuDateTimeParser();
         System.out.println(sq.parse(par));
     }

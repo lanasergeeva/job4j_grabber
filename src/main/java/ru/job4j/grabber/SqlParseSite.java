@@ -1,97 +1,80 @@
 package ru.job4j.grabber;
 
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import ru.job4j.SqlRuParse;
 
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
-
+import java.util.Objects;
 
 public class SqlParseSite implements Parse {
+
+    private static final Logger LOG = LogManager.getLogger(SqlRuParse.class.getName());
+
+    private final DateTimeParser dateTimeParser;
+
+    public SqlParseSite(DateTimeParser dateTimeParser) {
+        this.dateTimeParser = dateTimeParser;
+    }
+
     private List<Post> posts = new ArrayList<>();
 
     public List<Post> getPosts() {
         return posts;
     }
 
-    public void pages(String link, int pages) {
-        for (int i = 1; i <= pages; i++) {
-            String newStr = String.format(link + "%s", i);
-            parse(newStr);
-        }
-    }
-
-    public void parse(String link) {
-        SqlRuDateTimeParser date = new SqlRuDateTimeParser();
-        Document doc = null;
-        try {
-            doc = Jsoup.connect(link).get();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        Elements row = doc.select(".postslisttopic");
-        for (Element td : row) {
-            Element href = td.child(0);
-            System.out.println(href.attr("href"));
-            System.out.println(href.text());
-            Elements dates = td.siblingElements();
-            String dateSite = dates.get(4).text();
-            try {
-                System.out.println(date.parse(dateSite));
-            } catch (ParseException e) {
-                e.printStackTrace();
-            }
-        }
-    }
 
     @Override
     public List<Post> list(String link) {
         Document doc = null;
-        try {
-            doc = Jsoup.connect(link).get();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        Elements row = doc.select(".postslisttopic");
-        for (Element td : row) {
-            Element href = td.child(0);
-            String ref = href.attr("href");
-            posts.add(new Post(ref));
+        for (int i = 1; i <= 5; i++) {
+            try {
+                doc = Jsoup.connect(String.format(link + "%s", i)).get();
+            } catch (IOException e) {
+                LOG.error(" IO исключение в list", e);
+            }
+            Elements row = Objects.requireNonNull(doc).select(".postslisttopic");
+            for (Element td : row) {
+                Element href = td.child(0);
+                String ref = href.attr("href");
+                Post post = detail(ref);
+                if (post.getName().toLowerCase().contains("java")
+                        && !post.getName().toLowerCase().contains("javascript")) {
+                    posts.add(post);
+                }
+            }
         }
         return posts;
     }
 
     public Post detail(String link) {
-        Post post = new Post();
-        SqlRuDateTimeParser date = new SqlRuDateTimeParser();
+        Post post;
         Document doc = null;
         try {
             doc = Jsoup.connect(link).get();
         } catch (IOException e) {
-            e.printStackTrace();
+            LOG.error(" IO исключение в detail", e);
         }
-        String text = doc.select(".msgBody").get(1).text();
-        String name = doc.select(".messageHeader").get(0).text();
+        String text = Objects.requireNonNull(doc).select(".msgBody").get(1).text();
+        String name = doc.select(".messageHeader").get(0).ownText();
         String created = doc.select(".msgFooter").get(0).text();
         created = new StringBuilder(created).substring(0, created.indexOf("["));
-        try {
-            post = new Post(name, text, link, date.parse(created));
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
+        post = new Post(name, text, link, dateTimeParser.parse(created));
         return post;
     }
 
-    public static void main(String[] args) {
-        SqlParseSite sql = new SqlParseSite();
-        sql.list("https://www.sql.ru/forum/job-offers/5");
-        for (Post post : sql.getPosts()) {
-            post = sql.detail(post.getLink());
-            System.out.println(post);
-        }
+    public static void main(String[] args) throws ParseException, IOException {
+        DateTimeParser dt = new SqlRuDateTimeParser();
+        SqlParseSite sql = new SqlParseSite(dt);
+        List<Post> l = sql.list("https://www.sql.ru/forum/job-offers");
+        System.out.println(sql.detail("https://www.sql.ru/forum/1340389/ishhu-team-lead-java"));
     }
 }
+

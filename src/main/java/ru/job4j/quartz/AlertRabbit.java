@@ -60,7 +60,7 @@ public class AlertRabbit {
 
     public static class Rabbit implements Job {
         @Override
-        public void execute(JobExecutionContext context) throws JobExecutionException {
+        public void execute(JobExecutionContext context) {
             System.out.println("Rabbit runs here ...");
             Connection connection = (Connection) context.getJobDetail().getJobDataMap().get("cn");
             try (PreparedStatement statement = connection

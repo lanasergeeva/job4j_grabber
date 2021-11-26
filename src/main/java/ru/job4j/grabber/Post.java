@@ -1,10 +1,10 @@
 package ru.job4j.grabber;
 
-
 import java.time.LocalDateTime;
 import java.util.Objects;
 
 public class Post {
+
     private int id;
     private String name;
     private String text;
@@ -92,11 +92,11 @@ public class Post {
             return false;
         }
         Post post = (Post) o;
-        return id == post.id && Objects.equals(name, post.name) && Objects.equals(text, post.text) && Objects.equals(link, post.link) && Objects.equals(created, post.created);
+        return id == post.id && Objects.equals(name, post.name) && Objects.equals(link, post.link);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name, text, link, created);
+        return Objects.hash(id, name, link);
     }
 }
