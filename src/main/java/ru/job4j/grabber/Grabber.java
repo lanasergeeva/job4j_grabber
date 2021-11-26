@@ -100,6 +100,7 @@ public class Grabber implements Grab {
     }
 
     public static void main(String[] args) throws Exception {
+        String st = new String();
         Grabber grab = new Grabber();
         DateTimeParser dt = new SqlRuDateTimeParser();
         grab.cfg();
