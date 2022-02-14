@@ -8,6 +8,7 @@ import java.io.IOException;
 public class Sql2411 {
     public static void main(String[] args) throws IOException {
 
+
         Document doc = Jsoup.connect("https://www.sql.ru/forum/job-offers").get();
         Elements row2 = doc.select(".postslisttopic");
 
