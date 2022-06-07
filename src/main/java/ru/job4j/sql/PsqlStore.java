@@ -1,8 +1,8 @@
-package ru.job4j.grabber;
+package ru.job4j.sql;
 
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
-import org.postgresql.util.PSQLException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -10,12 +10,8 @@ import java.util.Properties;
 
 public class PsqlStore implements Store, AutoCloseable {
 
-    private static final Logger LOG = LogManager.getLogger(PsqlStore.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(PsqlStore.class);
     private Connection cnn;
-
-    public PsqlStore(Connection cnn) {
-        this.cnn = cnn;
-    }
 
     public PsqlStore(Properties cfg) {
         try {
@@ -37,7 +33,7 @@ public class PsqlStore implements Store, AutoCloseable {
     public Post getPost(ResultSet resultSet) throws SQLException {
         return new Post(
                 resultSet.getInt("id"),
-                resultSet.getString("names"),
+                resultSet.getString("name"),
                 resultSet.getString("text"),
                 resultSet.getString("link"),
                 resultSet.getTimestamp("created").toLocalDateTime()
@@ -47,7 +43,8 @@ public class PsqlStore implements Store, AutoCloseable {
     @Override
     public void save(Post post) {
         try (PreparedStatement statement =
-                     cnn.prepareStatement("INSERT INTO POST (NAMES , TEXT, link, created) VALUES (?, ?, ?, ?)",
+                     cnn.prepareStatement("INSERT INTO POST (NAME , TEXT, link, created) VALUES (?, ?, ?, ?)"
+                                     + "VALUES (?, ? ,?, ?) on conflict (link) do nothing",
                              Statement.RETURN_GENERATED_KEYS)) {
             statement.setString(1, post.getName());
             statement.setString(2, post.getText());
@@ -59,8 +56,6 @@ public class PsqlStore implements Store, AutoCloseable {
                     post.setId(generatedKeys.getInt(1));
                 }
             }
-        } catch (PSQLException p) {
-            LOG.error("Дубликат  в базе данных", p);
         } catch (Exception e) {
             LOG.error("Ошибка в save", e);
         }
@@ -90,7 +85,7 @@ public class PsqlStore implements Store, AutoCloseable {
             statement.setInt(1, id);
             try (ResultSet resultSet = statement.executeQuery()) {
                 if (resultSet.next()) {
-                    rsl =  getPost(resultSet);
+                    rsl = getPost(resultSet);
                 }
             }
         } catch (Exception e) {

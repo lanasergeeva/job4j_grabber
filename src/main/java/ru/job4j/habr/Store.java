@@ -1,9 +1,9 @@
-package ru.job4j.grabber;
+package ru.job4j.habr;
 
 import java.util.List;
 
 public interface Store {
-    void save(Post post);
+    Post save(Post post);
 
     List<Post> getAll();
 

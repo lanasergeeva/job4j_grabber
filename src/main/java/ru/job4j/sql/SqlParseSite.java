@@ -1,40 +1,38 @@
-package ru.job4j.grabber;
+package ru.job4j.sql;
 
 import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-import ru.job4j.SqlRuParse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import ru.job4j.habr.HabrCareerParse;
+
 
 import java.io.IOException;
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
 public class SqlParseSite implements Parse {
 
-    private static final Logger LOG = LogManager.getLogger(SqlRuParse.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(SqlParseSite.class);
+
+    public static final int PAGES = 5;
 
     private final DateTimeParser dateTimeParser;
 
     public SqlParseSite(DateTimeParser dateTimeParser) {
+
         this.dateTimeParser = dateTimeParser;
     }
 
-    private List<Post> posts = new ArrayList<>();
-
-    public List<Post> getPosts() {
-        return posts;
-    }
-
-
     @Override
     public List<Post> list(String link) {
+        List<Post> posts = new ArrayList<>();
         Document doc = null;
-        for (int i = 1; i <= 5; i++) {
+        for (int i = 1; i <= PAGES; i++) {
             try {
                 doc = Jsoup.connect(String.format(link + "%s", i)).get();
             } catch (IOException e) {
@@ -68,13 +66,6 @@ public class SqlParseSite implements Parse {
         created = new StringBuilder(created).substring(0, created.indexOf("["));
         post = new Post(name, text, link, dateTimeParser.parse(created));
         return post;
-    }
-
-    public static void main(String[] args) throws ParseException, IOException {
-        DateTimeParser dt = new SqlRuDateTimeParser();
-        SqlParseSite sql = new SqlParseSite(dt);
-        List<Post> l = sql.list("https://www.sql.ru/forum/job-offers");
-        System.out.println(sql.detail("https://www.sql.ru/forum/1340389/ishhu-team-lead-java"));
     }
 }
 

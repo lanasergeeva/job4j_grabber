@@ -1,11 +1,10 @@
-package ru.job4j.grabber;
+package ru.job4j.sql;
 
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
 import org.quartz.*;
 import org.quartz.impl.StdSchedulerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -20,7 +19,9 @@ import static org.quartz.TriggerBuilder.newTrigger;
 
 public class Grabber implements Grab {
 
-    private static final Logger LOG = LogManager.getLogger(Grabber.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(Grabber.class);
+
+    public static final String LINK = "https://www.sql.ru/forum/job-offers/";
 
     private final Properties cfg = new Properties();
 
@@ -36,7 +37,7 @@ public class Grabber implements Grab {
 
     public void cfg() throws IOException {
         try (InputStream in =
-                     new FileInputStream("C:\\projects\\job4j_grabber\\src\\main\\resources\\app.properties")) {
+                     Grabber.class.getClassLoader().getResourceAsStream("rabbit.properties")) {
             cfg.load(in);
         }
     }
@@ -50,7 +51,7 @@ public class Grabber implements Grab {
                 .usingJobData(data)
                 .build();
         SimpleScheduleBuilder times = simpleSchedule()
-                .withIntervalInSeconds(Integer.parseInt(cfg.getProperty("time")))
+                .withIntervalInSeconds(Integer.parseInt(cfg.getProperty("rabbit.interval")))
                 .repeatForever();
         Trigger trigger = newTrigger()
                 .startNow()
@@ -70,10 +71,9 @@ public class Grabber implements Grab {
             JobDataMap map = context.getJobDetail().getJobDataMap();
             Store store = (Store) map.get("store");
             Parse parse = (Parse) map.get("parse");
-            List<Post> posts = parse.list("https://www.sql.ru/forum/job-offers/");
+            List<Post> posts = parse.list(LINK);
             for (Post post : posts) {
                 store.save(post);
-                System.out.println(post);
             }
         }
     }
@@ -100,7 +100,6 @@ public class Grabber implements Grab {
     }
 
     public static void main(String[] args) throws Exception {
-        String st = new String();
         Grabber grab = new Grabber();
         DateTimeParser dt = new SqlRuDateTimeParser();
         grab.cfg();
