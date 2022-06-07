@@ -7,7 +7,7 @@
 + [Описание](#Описание)
 + [Технологии](#Используемые-технологии)
 + [Вид](#Общий вид приложения)
-+ 
++
 ## Описание.
 
 В данном приложении происходи парсинг Java вакансий с сайта https://career.habr.com/vacancies.
@@ -20,7 +20,8 @@
 + **Для парсинга страниц используется JSOUP**
 + **H2 используется для тестирования**, **JDBC**, **Liquibase**, **PostgresSQL**
 + **Java 17**, **SLF4J**
-+ 
+
+
 ## Общий вид приложения
 
 ![alt text](https://github.com/lanasergeeva/job4j_grabber/blob/master/src/main/java/ru/job4j/habr/images/view.png)
