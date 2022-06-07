@@ -1,4 +1,4 @@
-create table POST (
+create table if not exists POST (
 id serial primary key,
 name text,
 text text,
