@@ -1,7 +1,7 @@
-create table post (
+create table POST (
 id serial primary key,
 name text,
 text text,
-link text unique,
+link varchar(300) unique,
 created timestamp
 );

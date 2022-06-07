@@ -1,4 +1,7 @@
-package ru.job4j.grabber;
+package ru.job4j.sql;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.text.DateFormatSymbols;
 import java.text.ParseException;
@@ -13,6 +16,8 @@ public class SqlRuDateTimeParser implements DateTimeParser {
     private final SimpleDateFormat sdf =
             new SimpleDateFormat("dd MMM yy HH:mm", getDfs());
     private final DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd MMMM yy");
+
+    private static final Logger LOG = LoggerFactory.getLogger(SqlRuDateTimeParser.class);
 
     public static String[] getMonths() {
         return new String[]{"янв", "фев", "мар", "апр", "май", "июн",
@@ -37,13 +42,13 @@ public class SqlRuDateTimeParser implements DateTimeParser {
         try {
             rsl = LocalDateTime.ofInstant(sdf.parse(parse).toInstant(), ZoneId.systemDefault());
         } catch (ParseException e) {
-            e.printStackTrace();
+            LOG.error(" Ошибка в parse", e);
         }
         return rsl;
     }
 
 
-    public static void main(String[] args) throws ParseException {
+    public static void main(String[] args) {
         String par = "26 окт 21, 19:23";
         SqlRuDateTimeParser sq = new SqlRuDateTimeParser();
         System.out.println(sq.parse(par));

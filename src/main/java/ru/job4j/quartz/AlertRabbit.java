@@ -69,7 +69,6 @@ public class AlertRabbit {
                 statement.setTime(1, Time.valueOf(LocalTime.now()));
                 statement.setDate(2, Date.valueOf(LocalDate.now()));
                 statement.execute();
-
             } catch (Exception e) {
                 e.printStackTrace();
             }
